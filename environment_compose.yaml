@@ -1,0 +1,37 @@
+services:
+
+  minio:
+    image: minio/minio
+    environment:
+      - MINIO_CONSOLE_ADDRESS=:9001
+      - MINIO_ROOT_USER=message-system
+      - MINIO_ROOT_PASSWORD=message-system
+    ports:
+      - "3004:9000"
+      - "3005:9001"
+    command:
+      - server
+      - /data
+    volumes:
+      - minio-data:/data
+  
+  system-db:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: message-system
+    ports:
+      - 3001:3306
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - 3002:6379  
+  
+  message-backend-api:
+    build: messaging_api
+    ports:
+      - 3000:3000
+
+volumes:
+  minio-data:
