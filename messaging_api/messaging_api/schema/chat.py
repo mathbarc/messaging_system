@@ -1,7 +1,10 @@
 from typing import List
 from uuid import UUID
+from dataclasses import dataclass
 
+@dataclass
 class Chat:
-    chat_id:UUID
+    _id:int
+    uuid:UUID
     name:str
     user_list:List[str] = None

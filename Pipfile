@@ -4,10 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-fastapi = "*"
-fastapi-cors = "*"
-sqlalchemy = "*"
-redis = "*"
 
 [dev-packages]
 

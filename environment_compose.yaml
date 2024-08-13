@@ -17,9 +17,12 @@ services:
   
   system-db:
     image: mariadb
+    volumes:
+      - mariadb-data:/var/lib/mysql
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: message-system
+      MARIADB_DATABASE: message-system
     ports:
       - 3001:3306
 
@@ -35,3 +38,4 @@ services:
 
 volumes:
   minio-data:
+  mariadb-data: 

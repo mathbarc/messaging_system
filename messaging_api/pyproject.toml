@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "messaging-api"
+description = "Package for messaging system backend "
+requires-python = ">=3.8"
+dynamic = ["version"]
+dependencies = [
+    "fastapi",
+    "fastapi-cors",
+    "redis",
+    "mariadb"
+]
+
+
+[project.optional-dependencies]
+dev = [
+    "pylint>=2.10",
+    "black>=23.3.0"
+]
+tests = [
+    "pytest>=7.3.1",
+    "pytest-cov>=4.0.0"
+]
+docs = [
+    "sphinx>=5.0.1",
+    "sphinx-markdown-builder",
+    "sphinx_rtd_theme>=1.0.0"
+]
+
+[project.scripts]
+cropwise = "messaging_api.__main__:main"
+
+[tool.pylint]
+max-line-length = 88
+disable = [
+    "C0103", # (invalid-name)
+    "C0114", # (missing-module-docstring)
+    "C0115", # (missing-class-docstring)
+    "C0116", # (missing-function-docstring)
+    "R0903", # (too-few-public-methods)
+    "R0913", # (too-many-arguments)
+    "W0105", # (pointless-string-statement)
+]
+
+
+[tool.setuptools.dynamic]
+version = {attr = "messaging_api.__version__"}
+
+[tool.setuptools.packages.find]
+where=["."]
+exclude=["tests*","experiments*","docs*"]
+
+[tool.pytest.ini_options]
+minversion = "7.3.1"
+addopts = "-ra -q --cov --cov-report=xml"
+
+[tool.coverage.run]
+source = ["messaging_api"]
