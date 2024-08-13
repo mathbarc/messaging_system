@@ -70,6 +70,7 @@ class SystemDBController:
         connection.execute("insert into ContactList (contact_list_owner_id, contact_id) values (?,?)",(owner._id, contact._id))
         self._db.commit()
     
+    
 
 
 if __name__ == "__main__":
