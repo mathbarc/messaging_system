@@ -1,2 +1,0 @@
-[console_scripts]
-cropwise = messaging_api.__main__:main

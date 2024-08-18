@@ -30,6 +30,8 @@ services:
     image: "redis:alpine"
     ports:
       - 3002:6379  
+    volumes:
+      - redis_data:/data
   
   message-backend-api:
     build: messaging_api
@@ -39,3 +41,4 @@ services:
 volumes:
   minio-data:
   mariadb-data: 
+  redis_data:

@@ -11,7 +11,7 @@ class MessageType(Enum):
 
 @dataclass
 class Message:
-    message_id:UUID
+    id:int
     type:MessageType
     timestamp: datetime
     content:str

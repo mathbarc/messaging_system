@@ -1,23 +1,33 @@
 import mariadb
 from mariadb import connect
 from messaging_api.schema import User
+from messaging_api.config import SYSTEMDB_USERNAME, SYSTEMDB_PASSWORD, SYSTEMDB_ADDR, SYSTEMDB_PORT, SYSTEMDB_DBNAME
 
 
 class SystemDBController:
     
-    def __init__(self, user, password, host, port, dbname="message-system"):
+    def __init__(self, 
+                 user = SYSTEMDB_USERNAME, 
+                 password = SYSTEMDB_PASSWORD, 
+                 host = SYSTEMDB_ADDR, 
+                 port = SYSTEMDB_PORT, 
+                 dbname = SYSTEMDB_DBNAME):
+        
         self._db = connect( host = host,
                             port = port,
                             user = user,
                             password = password,
                             database = dbname)
         
+        self._create_db_v1()
+    
+    def _create_db_v1(self):
         connection = self._db.cursor()
         connection.execute("""
                            create table if not exists User (
                                id BIGINT AUTO_INCREMENT,
-                               uuid UUID DEFAULT (uuid()) UNIQUE,
-                               name VARCHAR(32) UNIQUE,
+                               username VARCHAR(32) UNIQUE,
+                               name VARCHAR(32),
                                password VARCHAR(64),
                                email VARCHAR(128),
                                PRIMARY KEY(id)
@@ -35,7 +45,6 @@ class SystemDBController:
         connection.execute("""
                            create table if not exists Chat (
                                id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                               uuid UUID DEFAULT (uuid()) UNIQUE,
                                name VARCHAR(32) UNIQUE
                            );""")
         
@@ -51,35 +60,49 @@ class SystemDBController:
 
         connection.close()
     
-    def register_user(self, name, password, email) -> User:
+    def register_user(self, name, username, password, email) -> User:
         connection = self._db.cursor()
-        connection.execute("insert into User (name, password, email) values (?,?,?)",(name, password, email))
+        connection.execute("insert into User (name, username, password, email) values (?,?,PASSWORD(?),?)",(name, username, password, email))
         self._db.commit()
         id = connection.lastrowid
         
-        connection.execute("select id, uuid, name, email from User where id = ?",(id,))
+        connection.execute("select id, name, username, email from User where id = ?",(id,))
         
-        for id, uuid, name, email in connection:
-            response = User(_id=id, uuid=uuid, name=name, email=email)
+        for id, name, username, email in connection:
+            response = User(id=id, name=name, username=username, email=email)
         
         connection.close()
         return response
 
+    def login(self, username, password):
+        connection = self._db.cursor()
+        connection.execute("select id, name, username, email from User where name = ? and password = PASSWORD(?) LIMIT 1",(username, password))
+        
+        for id, name, username, email in connection:
+            user = User(id=id, name=name, username=username, email=email)
+            break
+        
+        return user.create_token()
+        
+
     def add_contact(self, owner:User, contact:User):
         connection = self._db.cursor()
-        connection.execute("insert into ContactList (contact_list_owner_id, contact_id) values (?,?)",(owner._id, contact._id))
+        connection.execute("insert into ContactList (contact_list_owner_id, contact_id) values (?,?)",(owner.id, contact.id))
         self._db.commit()
     
+
     
 
 
 if __name__ == "__main__":
-    db = SystemDBController("root", "message-system", "127.0.0.1", 3001)
-    user1 = db.register_user("matheus", "123456", "matheusbarcelosoliveira@gmail.com")
-    user2 = db.register_user("wedsney", "123456", "matheusbarcelosoliveira@gmail.com")
+    db = SystemDBController()
+    # user1 = db.register_user("matheus", "Matheus", "123456", "matheusbarcelosoliveira@gmail.com")
+    # user2 = db.register_user("wedsney", "Wedsney", "123456", "matheusbarcelosoliveira@gmail.com")
     
-    db.add_contact(user1, user2)
-    db.add_contact(user2, user1)
+    # db.add_contact(user1, user2)
+    # db.add_contact(user2, user1)
     
+    token = db.login("matheus", "123456")
+    user = User.from_token(token)
     ...
     

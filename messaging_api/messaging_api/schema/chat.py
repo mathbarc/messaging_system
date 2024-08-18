@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 @dataclass
 class Chat:
-    _id:int
-    uuid:UUID
+    id:int
     name:str
     user_list:List[str] = None

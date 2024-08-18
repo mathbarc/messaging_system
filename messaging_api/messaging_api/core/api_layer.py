@@ -1,12 +1,21 @@
 from typing import List
 from ..schema import User, Chat, Message, MessageType
+from .system_db import SystemDBController
 
 
-def register_client(username:str, password:str, email:str) -> str:
-    pass
+
+def register_client(name:str, username:str, password:str, email:str) -> str:
+    systemdb = SystemDBController()
+    user = systemdb.register_user(name = name, username=username, password=password, email=email)
+    
+    return user 
+    
 
 def login(username:str, password:str) -> str:
-    pass
+    systemdb = SystemDBController()
+    token = systemdb.login(username=username, password=password)
+    
+    return token
 
 def list_contacts(user_token:str, itens_per_page:int, offset:int) -> List[User]:
     pass
