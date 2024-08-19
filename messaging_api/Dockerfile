@@ -1,16 +1,21 @@
-from python:3.11.2-slim as build
-
+FROM debian:bookworm as base
 RUN apt update -y
-RUN apt install build-essential -y
-RUN pip install pipenv
+RUN apt install python3 python3-pip libmariadb3 -y
 
+
+FROM base as build
+
+RUN apt install build-essential libmariadb-dev mariadb-client pipenv -y
+
+WORKDIR /home
 COPY ./ ./
 
-RUN PIPENV_VENV_IN_PROJECT=1 pipenv install
+RUN PIPENV_VENV_IN_PROJECT=1 pipenv install 
 
-from python:3.11.2-slim as runtime
 
-COPY --from=build ./.venv/ /venv/
-ENV PATH="/venv/bin:$PATH"
+FROM base as runtime
 
-ENTRYPOINT [ "bash" ]
+COPY --from=build /home/.venv/ /home/.venv/
+ENV PATH="/home/.venv/bin:$PATH"
+
+ENTRYPOINT [ "messaging_api" ]

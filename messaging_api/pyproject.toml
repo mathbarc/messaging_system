@@ -12,6 +12,7 @@ dependencies = [
     "fastapi-cors",
     "redis",
     "mariadb",
+    "uvicorn",
     "pyjwt"
 ]
 
@@ -32,7 +33,7 @@ docs = [
 ]
 
 [project.scripts]
-cropwise = "messaging_api.__main__:main"
+messaging_api = "messaging_api.__main__:main"
 
 [tool.pylint]
 max-line-length = 88

@@ -1,3 +1,5 @@
+from typing import List
+
 import mariadb
 from mariadb import connect
 from messaging_api.schema import User
@@ -60,7 +62,7 @@ class SystemDBController:
 
         connection.close()
     
-    def register_user(self, name, username, password, email) -> User:
+    def register_user(self, name:str, username:str, password:str, email:str) -> User:
         connection = self._db.cursor()
         connection.execute("insert into User (name, username, password, email) values (?,?,PASSWORD(?),?)",(name, username, password, email))
         self._db.commit()
@@ -84,11 +86,25 @@ class SystemDBController:
         
         return user.create_token()
         
+    def list_contacts(self, user:User, itens_per_page:int=10, offset:int=0) -> List[User]:
+        connection = self._db.cursor()
+        connection.execute("select c.id, c.name, c.username, c.email from ContactList con left join User c on con.contact_id = c.id where con.contact_list_owner_id = ? LIMIT ? OFFSET ?",(user.id,itens_per_page, offset))
+        
+        users = []
+        
+        for id, name, username, email in connection:
+            user = User(id=id, name=name, username=username, email=email)
+            users.append(user)
+        
+        return users
+        
+
 
     def add_contact(self, owner:User, contact:User):
         connection = self._db.cursor()
         connection.execute("insert into ContactList (contact_list_owner_id, contact_id) values (?,?)",(owner.id, contact.id))
         self._db.commit()
+        
     
 
     
@@ -104,5 +120,7 @@ if __name__ == "__main__":
     
     token = db.login("matheus", "123456")
     user = User.from_token(token)
+    
+    contacts = db.list_contacts(user)
     ...
     

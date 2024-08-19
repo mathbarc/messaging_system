@@ -4,7 +4,7 @@ from .system_db import SystemDBController
 
 
 
-def register_client(name:str, username:str, password:str, email:str) -> str:
+def register_client(name:str, username:str, password:str, email:str) -> User:
     systemdb = SystemDBController()
     user = systemdb.register_user(name = name, username=username, password=password, email=email)
     
@@ -17,8 +17,17 @@ def login(username:str, password:str) -> str:
     
     return token
 
-def list_contacts(user_token:str, itens_per_page:int, offset:int) -> List[User]:
-    pass
+def list_contacts(user:User, itens_per_page:int, offset:int) -> List[User]:
+    systemdb = SystemDBController()
+    
+    contact_list = systemdb.list_contacts(user, itens_per_page, offset)
+    
+    return contact_list
+
+def add_user_to_contacts(user:User, contact:User):
+    systemdb = SystemDBController()
+    systemdb.add_contact(user, contact)
+    
 
 def start_chat(user_token:str, user_id_list:List[str]) -> Chat:
     pass

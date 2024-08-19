@@ -3,3 +3,8 @@ from . import config
 from . import schema
 
 from . import core
+from . import routers
+
+from .app import *
+
+from . import __main__

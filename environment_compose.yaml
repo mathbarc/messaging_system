@@ -7,21 +7,23 @@ services:
       - MINIO_ROOT_USER=message-system
       - MINIO_ROOT_PASSWORD=message-system
     ports:
-      - "3004:9000"
-      - "3005:9001"
+      - "3003:9000"
+      - "3004:9001"
     command:
       - server
       - /data
     volumes:
       - minio-data:/data
   
-  system-db:
+  systemdb:
     image: mariadb
     volumes:
       - mariadb-data:/var/lib/mysql
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: message-system
+      MARIADB_USERNAME: message-system
+      MARIADB_PASSWORD: message-system
       MARIADB_DATABASE: message-system
     ports:
       - 3001:3306
@@ -36,7 +38,13 @@ services:
   message-backend-api:
     build: messaging_api
     ports:
-      - 3000:3000
+      - 5000:5000
+    environment:
+      SYSTEMDB_ADDR: systemdb
+      SYSTEMDB_USERNAME: root
+      SYSTEMDB_PASSWORD: message-system
+      SYSTEMDB_DBNAME: message-system
+      SYSTEMDB_PORT: 3306
 
 volumes:
   minio-data:
