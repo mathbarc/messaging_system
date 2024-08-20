@@ -13,7 +13,8 @@ dependencies = [
     "redis",
     "mariadb",
     "uvicorn",
-    "pyjwt"
+    "pyjwt",
+    "python-multipart" 
 ]
 
 

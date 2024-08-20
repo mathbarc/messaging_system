@@ -4,7 +4,7 @@ import mariadb
 from mariadb import connect
 from messaging_api.schema import User
 from messaging_api.config import SYSTEMDB_USERNAME, SYSTEMDB_PASSWORD, SYSTEMDB_ADDR, SYSTEMDB_PORT, SYSTEMDB_DBNAME
-
+from ..exceptions import WrongCredentialsException, UserAlreadyExists, AlreadyContactException
 
 class SystemDBController:
     
@@ -64,7 +64,10 @@ class SystemDBController:
     
     def register_user(self, name:str, username:str, password:str, email:str) -> User:
         connection = self._db.cursor()
-        connection.execute("insert into User (name, username, password, email) values (?,?,PASSWORD(?),?)",(name, username, password, email))
+        try:
+            connection.execute("insert into User (name, username, password, email) values (?,?,PASSWORD(?),?)",(name, username, password, email))
+        except mariadb.IntegrityError:
+            raise UserAlreadyExists(username)
         self._db.commit()
         id = connection.lastrowid
         
@@ -80,10 +83,12 @@ class SystemDBController:
         connection = self._db.cursor()
         connection.execute("select id, name, username, email from User where name = ? and password = PASSWORD(?) LIMIT 1",(username, password))
         
-        for id, name, username, email in connection:
-            user = User(id=id, name=name, username=username, email=email)
-            break
+        row = connection.fetchone()
+        if row is None:
+            raise WrongCredentialsException()
         
+        user = User(id=row[0], name=row[1], username=row[2], email=row[3])
+            
         return user.create_token()
         
     def list_contacts(self, user:User, itens_per_page:int=10, offset:int=0) -> List[User]:
@@ -102,7 +107,10 @@ class SystemDBController:
 
     def add_contact(self, owner:User, contact:User):
         connection = self._db.cursor()
-        connection.execute("insert into ContactList (contact_list_owner_id, contact_id) values (?,?)",(owner.id, contact.id))
+        try:
+            connection.execute("insert into ContactList (contact_list_owner_id, contact_id) values (?,?)",(owner.id, contact.id))
+        except mariadb.IntegrityError:
+            raise AlreadyContactException()
         self._db.commit()
         
     

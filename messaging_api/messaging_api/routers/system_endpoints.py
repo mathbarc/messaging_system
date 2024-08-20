@@ -1,7 +1,11 @@
-from typing import List
+from typing import List, Annotated
 from messaging_api.schema import LoginSchema, SignUpSchema, AddContactSchema, TokenResponse, User
 from messaging_api.core import api_layer
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
+
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+bearer_scheme = HTTPBearer()
 
 
 router = APIRouter(prefix="/api/v1")
@@ -17,15 +21,15 @@ def signup(request:Request, body:SignUpSchema) -> TokenResponse:
     return TokenResponse(user.create_token())
 
 @router.get("/list_contacts")
-def list_contacts(request:Request, itens_per_page:int=10, offset:int=0) -> List[User]:
-    token = request.headers.get("Authorization").split(" ")[-1]
+def list_contacts(request:Request, authorization: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)], itens_per_page:int=10, offset:int=0) -> List[User]:
+    token = authorization.credentials
     user = User.from_token(token)
     contacts = api_layer.list_contacts(user,itens_per_page, offset)
     return contacts
     
 @router.post("/add_contact")
-def add_contact(request:Request, body:AddContactSchema):
-    token = request.headers.get("Authorization").split(" ")[-1]
+def add_contact(request:Request, authorization: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)], body:AddContactSchema):
+    token = authorization.credentials
     user = User.from_token(token)
     api_layer.add_user_to_contacts(user, User(body.id, body.username, body.name, body.email))
     return "OK"

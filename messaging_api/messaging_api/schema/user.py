@@ -3,6 +3,7 @@ from dataclasses import dataclass, asdict
 import datetime
 import jwt
 from messaging_api.config import API_KEY
+from ..exceptions import TokenInvalidException
 
 @dataclass
 class User:
@@ -23,7 +24,9 @@ class User:
 
     @classmethod
     def from_token(cls, token:str):
-        
-        data = jwt.api_jwt.decode(token, API_KEY, ["HS256"])
+        try:
+            data = jwt.api_jwt.decode(token, API_KEY, ["HS256"])
+        except jwt.exceptions.InvalidTokenError:
+            raise TokenInvalidException()
         
         return cls(**data["user"])

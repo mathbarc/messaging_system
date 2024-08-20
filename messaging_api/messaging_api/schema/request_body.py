@@ -4,6 +4,7 @@ from dataclasses import dataclass
 class LoginSchema:
     username: str
     password: str
+    grant_type:str = "password"
     
 @dataclass
 class SignUpSchema:
