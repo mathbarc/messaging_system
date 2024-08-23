@@ -10,7 +10,6 @@ class User:
     id:int
     username:str
     name:str
-    email:str
 
     def create_token(self) -> str:
         expiration_date = datetime.datetime.now()+datetime.timedelta(hours=8)

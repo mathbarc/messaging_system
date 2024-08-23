@@ -29,35 +29,36 @@ class SystemDBController:
                            create table if not exists User (
                                id BIGINT AUTO_INCREMENT,
                                username VARCHAR(32) UNIQUE,
-                               name VARCHAR(32),
-                               password VARCHAR(64),
-                               email VARCHAR(128),
+                               name VARCHAR(32) NOT NULL,
+                               password VARCHAR(64) NOT NULL,
+                               email VARCHAR(128) NOT NULL,
+                               photo VARCHAR(128),
                                PRIMARY KEY(id)
                            );""")
         
         connection.execute("""
                            create table if not exists ContactList (
-                                contact_list_owner_id BIGINT PRIMARY KEY,
-                                contact_id BIGINT,
+                                contact_list_owner_id BIGINT NOT NULL,
+                                contact_id BIGINT NOT NULL,
+                                constraint PK_OwnerContact PRIMARY KEY(contact_list_owner_id, contact_id),
                                 constraint FK_ContactListOwner FOREIGN KEY (contact_list_owner_id) REFERENCES User(id),
-                                constraint FK_ContactListContact FOREIGN KEY (contact_id) REFERENCES User(id),
-                                constraint UNI_OwnerContact UNIQUE (contact_list_owner_id, contact_id)
+                                constraint FK_ContactListContact FOREIGN KEY (contact_id) REFERENCES User(id)
                            );""")
         
         connection.execute("""
                            create table if not exists Chat (
                                id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                               name VARCHAR(32) UNIQUE
+                               name VARCHAR(32) UNIQUE NOT NULL
                            );""")
         
         connection.execute("""
                            create table if not exists ChatUser (
-                               chat_id BIGINT PRIMARY KEY,
-                               user_id BIGINT,
+                               chat_id BIGINT,
+                               user_id BIGINT NOT NULL,
                                is_admin BIT DEFAULT FALSE,
+                               constraint PK_ChatUser PRIMARY KEY (chat_id, user_id),
                                constraint FK_Chat FOREIGN KEY (chat_id) REFERENCES Chat(id),
-                               constraint FK_User FOREIGN KEY (user_id) REFERENCES User(id),
-                               constraint UNI_ChatUser UNIQUE (chat_id, user_id)
+                               constraint FK_User FOREIGN KEY (user_id) REFERENCES User(id)
                            );""")
 
         connection.close()
@@ -71,23 +72,23 @@ class SystemDBController:
         self._db.commit()
         id = connection.lastrowid
         
-        connection.execute("select id, name, username, email from User where id = ?",(id,))
+        connection.execute("select id, name, username from User where id = ?",(id,))
         
-        for id, name, username, email in connection:
-            response = User(id=id, name=name, username=username, email=email)
+        for id, name, username in connection:
+            response = User(id=id, name=name, username=username)
         
         connection.close()
         return response
 
     def login(self, username, password):
         connection = self._db.cursor()
-        connection.execute("select id, name, username, email from User where name = ? and password = PASSWORD(?) LIMIT 1",(username, password))
+        connection.execute("select id, name, username from User where name = ? and password = PASSWORD(?) LIMIT 1",(username, password))
         
         row = connection.fetchone()
         if row is None:
             raise WrongCredentialsException()
         
-        user = User(id=row[0], name=row[1], username=row[2], email=row[3])
+        user = User(id=row[0], name=row[1], username=row[2])
             
         return user.create_token()
         
@@ -97,8 +98,8 @@ class SystemDBController:
         
         users = []
         
-        for id, name, username, email in connection:
-            user = User(id=id, name=name, username=username, email=email)
+        for id, name, username in connection:
+            user = User(id=id, name=name, username=username)
             users.append(user)
         
         return users
