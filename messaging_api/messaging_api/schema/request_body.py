@@ -15,10 +15,7 @@ class SignUpSchema:
 
 @dataclass
 class AddContactSchema:
-    id: int
-    username: str
-    name: str
-    email: str
+    id: str
     
 @dataclass
 class TokenResponse:

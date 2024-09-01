@@ -14,7 +14,8 @@ dependencies = [
     "mariadb",
     "uvicorn",
     "pyjwt",
-    "python-multipart" 
+    "python-multipart",
+    "boto3"
 ]
 
 

@@ -25,4 +25,7 @@ class AlreadyContactException(MessagingSystemException):
     def __init__(self, *args: object) -> None:
         super().__init__(400, "User is a contact already", *args)
         
+class StorageException(MessagingSystemException):
+    def __init__(self, path, status_code, message, *args: object) -> None:
+        super().__init__(status_code, f"error while storing {path}: {message}", *args)
         

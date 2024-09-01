@@ -1,9 +1,8 @@
 __version__="0.0.1"
-from . import config
-from . import schema
-
-from . import core
-from . import routers
+from .config import *
+from .schema import *
+from .core import *
+from .routers import *
 
 from .app import *
 
