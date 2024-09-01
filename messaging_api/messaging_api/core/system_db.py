@@ -30,7 +30,7 @@ class SystemDBController:
                                id UUID DEFAULT SYS_GUID(),
                                username VARCHAR(32) UNIQUE,
                                name VARCHAR(32) NOT NULL,
-                               password VARCHAR(64) NOT NULL,
+                               password VARCHAR(41) NOT NULL,
                                email VARCHAR(128) NOT NULL,
                                photo VARCHAR(128),
                                PRIMARY KEY(id)
