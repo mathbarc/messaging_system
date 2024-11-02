@@ -1,4 +1,3 @@
-from uuid import UUID
 from enum import Enum
 from datetime import datetime
 from dataclasses import dataclass
